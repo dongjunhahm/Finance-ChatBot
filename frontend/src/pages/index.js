@@ -9,7 +9,15 @@ const Home = () => {
     setInputValue(e.target.value);
   };
 
-  const handleSubmit = () => {};
+  const handleSubmit = () => {
+    axios
+      .post("http://localhost:5000/ask", {
+        question: "What is the stock market trend today?",
+      })
+      .then((response) => {
+        console.log(response.data);
+      });
+  };
 
   const handleKeyPress = (e) => {
     if (e.key === "Enter") {
