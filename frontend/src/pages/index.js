@@ -4,25 +4,28 @@ import { useState, useEffect } from "react";
 
 const Home = () => {
   const [inputValue, setInputValue] = useState("");
+  const [answer, setAnswer] = useState("");
 
   const handleInput = (e) => {
     setInputValue(e.target.value);
   };
 
-  const handleSubmit = () => {
+  const ask = async () => {
     axios
-      .post("http://localhost:5000/ask", {
-        question: "What is the stock market trend today?",
+      .post("http://localhost:8000/api/ask", {
+        headers: { "Content-Type": "application/json" },
+        request: JSON.stringify({ inputValue }),
       })
       .then((response) => {
         console.log(response.data);
+        setAnswer(response);
       });
   };
 
   const handleKeyPress = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      handleSubmit();
+      ask();
     }
   };
 
