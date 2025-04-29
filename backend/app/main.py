@@ -14,6 +14,9 @@ app.add_middleware(
 
 @app.post("/api/ask")
 async def ask_question(request: Request):
-  return("hello wordl")
+  data = await request.json()
+  question = data.get("question", "")
+  answer = generate_answer(question) #rag logic here
+  return {"answer": answer}
 
 
