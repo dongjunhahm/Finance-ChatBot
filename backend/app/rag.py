@@ -8,23 +8,25 @@ from langchain_chroma import Chroma
 from langchain_ollama.llms import OllamaLLM
 
 #wtf is this 
-os.environ['USER_AGENT'] = 'dd'
+os.environ['USER_AGENT'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
 
 #specific to yahoo finance main page -> need to figure out how to access individual articles 
 #or maybe article titles are enough? need to rethink
-bs4_strainer = bs4.filter.SoupStrainer(class_=("mainContainer"))
+bs4_strainer = bs4.filter.SoupStrainer(class_="module-hero hero-3-col yf-36pijq")
 loader = WebBaseLoader(
-    web_paths=("https://finance.yahoo.com/"),
+    web_paths=("https://finance.yahoo.com/",),
     #specifies how you want to look at the things in the bs4_strainer var
     bs_kwargs={"parse_only": bs4_strainer},
 )
 docs = loader.load()
-
+print(docs)
 text_splitter = RecursiveCharacterTextSplitter(
     chunk_size = 1200, chunk_overlap=100, add_start_index=True
 )
 #splitting everything contained in the docs into manageable chunks
 all_splits = text_splitter.split_documents(docs)
+
+
 
 #translator for words into numerical format 
 local_embeddings = OllamaEmbeddings(model="all-minilm")
@@ -46,15 +48,16 @@ retrieved_docs = retriever.invoke(question)
 context = ' '.join([doc.page_content for doc in retrieved_docs])
 
 
-#generating response with LLM 
-llm = OllamaLLM(model="llama3.2:1b")
-response = llm.invoke(f"""Answer the question according to the context given very briefly:
-                      Question : {question}.
-                      Context : {context}
-                      """)
 
 
 
 
-def generate_answer(): 
-    return(docs)
+
+def generate_answer(question): 
+    #generating response with LLM 
+  llm = OllamaLLM(model="llama3.2:1b")
+  response = llm.invoke(f"""Answer the question according to the context given very briefly:
+    Question : {question}.
+    Context : {context}
+    """)
+  return(response)

@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from backend.app.rag import generate_answer
+from app.rag import generate_answer
 
 app = FastAPI()
 

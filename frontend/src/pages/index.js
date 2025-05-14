@@ -37,8 +37,10 @@ const Home = () => {
         value={inputValue}
         onChange={handleInput}
         onKeyDown={handleKeyPress}
-        placeHolder="Enter Question to Get Started!"
+        placeholder="Enter Question to Get Started!"
       ></input>
+
+      <p>{answer}</p>
     </div>
   );
 };
