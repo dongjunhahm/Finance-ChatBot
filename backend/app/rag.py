@@ -19,7 +19,6 @@ loader = WebBaseLoader(
     bs_kwargs={"parse_only": bs4_strainer},
 )
 docs = loader.load()
-print(docs)
 text_splitter = RecursiveCharacterTextSplitter(
     chunk_size = 1200, chunk_overlap=100, add_start_index=True
 )
@@ -35,18 +34,10 @@ vectorstore = Chroma.from_documents(documents=all_splits,
                                     embedding = local_embeddings)
 
 #implementing retrieval system 
-question = "What is going on in the stock market today?"
 #looking for the most similar documents in our vector store to the query given
 #k = 3 gives top 3 most similar documents to question
 retriever = vectorstore.as_retriever(search_type="similarity",
                                      search_kwargs={"k": 3})
-#must now actually call the retriever on the given query, which in thsi case is question 
-retrieved_docs = retriever.invoke(question)
-
-#formatting the retrieved relevant page contents into formatted context for the llm 
-#might have to change page_content here to whatever is actually scraped from on yahoo finance 
-context = ' '.join([doc.page_content for doc in retrieved_docs])
-
 
 
 
@@ -54,10 +45,38 @@ context = ' '.join([doc.page_content for doc in retrieved_docs])
 
 
 def generate_answer(question): 
+  #must now actually call the retriever on the given query, which in thsi case is question 
+  retrieved_docs = retriever.invoke(question)
+
+  #formatting the retrieved relevant page contents into formatted context for the llm 
+  #might have to change page_content here to whatever is actually scraped from on yahoo finance 
+  context = ' '.join([doc.page_content for doc in retrieved_docs])
+
+
     #generating response with LLM 
+  print(question)
   llm = OllamaLLM(model="llama3.2:1b")
-  response = llm.invoke(f"""Answer the question according to the context given very briefly:
-    Question : {question}.
-    Context : {context}
-    """)
-  return(response)
+  prompt = f"""
+    ------ Instructions ------
+    Follow these instructions sequentially. 
+
+    - Given the question regarding finance, 
+    - Check if the question asks about a specific stock or sector
+    - Check if the question asks a general question about the market state or things to look out for
+    - If a specific stock/sector is mentioned, focus on how the provided context may affect the stock/sector mentioned.
+    - If a specific stock/sector is mentioned but the context does not discuss the stock/sector, respond with "No significant impact on [stock/sector]" or similar phrasing. 
+    - If a general and open ended question about the market is asked, instead give a summary about the most important or key events. 
+
+    - You are to provide a direct answer to the question. 
+
+
+
+    ----- QUESTION ------ 
+    {question}
+
+    ----- CONTEXT -------
+    {context}
+    """
+  response = llm.invoke(prompt)
+  print(response)
+  return(["response" + response, "prompt" + prompt])
