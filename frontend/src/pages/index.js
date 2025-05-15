@@ -14,11 +14,11 @@ const Home = () => {
     axios
       .post("http://localhost:8000/api/ask", {
         headers: { "Content-Type": "application/json" },
-        request: JSON.stringify({ inputValue }),
+        request: JSON.stringify({ question: inputValue }),
       })
       .then((response) => {
         console.log(response.data);
-        setAnswer(response);
+        setAnswer(response.data.answer);
       });
   };
 

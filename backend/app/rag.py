@@ -24,7 +24,7 @@ text_splitter = RecursiveCharacterTextSplitter(
 )
 #splitting everything contained in the docs into manageable chunks
 all_splits = text_splitter.split_documents(docs)
-
+print(all_splits)
 
 
 #translator for words into numerical format 
@@ -58,6 +58,8 @@ def generate_answer(question):
   llm = OllamaLLM(model="llama3.2:1b")
   prompt = f"""
     ------ Instructions ------
+  
+   
     Follow these instructions sequentially. 
 
     - Given the question regarding finance, 
@@ -69,8 +71,6 @@ def generate_answer(question):
 
     - You are to provide a direct answer to the question. 
 
-
-
     ----- QUESTION ------ 
     {question}
 
@@ -79,4 +79,4 @@ def generate_answer(question):
     """
   response = llm.invoke(prompt)
   print(response)
-  return(["response" + response, "prompt" + prompt])
+  return(response)
