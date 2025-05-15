@@ -53,8 +53,7 @@ def generate_answer(question):
   context = ' '.join([doc.page_content for doc in retrieved_docs])
 
 
-    #generating response with LLM 
-  print(question)
+  #generating response with LLM 
   llm = OllamaLLM(model="llama3.2:1b")
   prompt = f"""
     ------ Instructions ------

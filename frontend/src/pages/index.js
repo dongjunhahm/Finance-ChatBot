@@ -12,10 +12,13 @@ const Home = () => {
 
   const ask = async () => {
     axios
-      .post("http://localhost:8000/api/ask", {
-        headers: { "Content-Type": "application/json" },
-        request: JSON.stringify({ question: inputValue }),
-      })
+      .post(
+        "http://localhost:8000/api/ask",
+        { question: inputValue },
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      )
       .then((response) => {
         console.log(response.data);
         setAnswer(response.data.answer);
