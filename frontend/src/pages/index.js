@@ -1,51 +1,11 @@
 "use client";
-import axios from "axios";
-import { useState, useEffect } from "react";
+import Chatbot from "../components/Chatbot";
 
-const Home = () => {
-  const [inputValue, setInputValue] = useState("");
-  const [answer, setAnswer] = useState("");
-
-  const handleInput = (e) => {
-    setInputValue(e.target.value);
-  };
-
-  const ask = async () => {
-    axios
-      .post(
-        "http://localhost:8000/api/ask",
-        { question: inputValue },
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      )
-      .then((response) => {
-        console.log(response.data);
-        setAnswer(response.data.answer);
-      });
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      ask();
-    }
-  };
-
+export default function Home() {
   return (
-    <div>
-      <button>hi world</button>
-      <input
-        type="text"
-        value={inputValue}
-        onChange={handleInput}
-        onKeyDown={handleKeyPress}
-        placeholder="Enter Question to Get Started!"
-      ></input>
-
-      <p>{answer}</p>
-    </div>
+    <main className="min-h-screen p-4 bg-gray-100">
+      <h1 className="text-2xl font-bold mb-6 text-center">Finance Chatbot</h1>
+      <Chatbot />
+    </main>
   );
-};
-
-export default Home;
+}
