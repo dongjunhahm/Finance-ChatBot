@@ -8,7 +8,7 @@ import Chatbox from "../components/chatbox";
 const Home = () => {
   const [inputValue, setInputValue] = useState("");
   const [messages, setMessages] = useState([
-    { sender: "bot", text: "Ask a financial question to get started." },
+    { sender: "bot", text: "Ask a financial question to get started!" },
   ]);
   const chatContainerRef = useRef(null);
 
