@@ -68,8 +68,10 @@ def generate_answer(question):
     - If a specific stock/sector is mentioned but the context does not discuss the stock/sector, respond with "No significant impact on [stock/sector]" or similar phrasing. 
     - If a general and open ended question about the market is asked, instead give a summary about the most important or key events. 
     - Format your response in a markdown friendly format.
+    - Create spaces via newlines in between each section of text you create.
 
-    - You are to provide a direct answer to the question. 
+    - You are to provide a direct answer ONLY to the question. 
+
 
     ----- QUESTION ------ 
     {question}
