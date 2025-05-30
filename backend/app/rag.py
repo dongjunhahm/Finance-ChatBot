@@ -64,9 +64,12 @@ def generate_answer(question):
     - Given the question regarding finance, 
     - Check if the question asks about a specific stock or sector
     - Check if the question asks a general question about the market state or things to look out for
+    - Check if the question asks about a specific event that has occured.
     - If a specific stock/sector is mentioned, focus on how the provided context may affect the stock/sector mentioned.
     - If a specific stock/sector is mentioned but the context does not discuss the stock/sector, respond with "No significant impact on [stock/sector]" or similar phrasing. 
+    - If a specific event is mentioned, focus on how the provided context describes the event, and mention any possible impacts from that event in financial sectors.
     - If a general and open ended question about the market is asked, instead give a summary about the most important or key events. 
+    - If a general financial question is asked that would not require the context, instead reply to the best of your ability, acting as a financial analyst expert.
     - Format your response in a markdown friendly format.
     - Create spaces via newlines in between each section of text you create.
 
