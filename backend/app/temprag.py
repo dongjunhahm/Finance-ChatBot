@@ -1,22 +1,56 @@
 import bs4
 import os
 import asyncio
+import requests
+from playwright.async_api import async_playwright
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from bs4.filter import SoupStrainer
 from langchain_community.document_loaders import PlaywrightURLLoader
 from langchain_ollama import OllamaEmbeddings
 from langchain_chroma import Chroma
 from langchain_ollama.llms import OllamaLLM
-
+from langchain_core.documents import Document
 
 #wtf is this 
 os.environ['USER_AGENT'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
 
 #specific to yahoo finance main page -> need to figure out how to access individual articles 
 #or maybe article titles are enough? need to rethink
+docs = []
+async def main(): 
+  global docs
+  async with async_playwright() as p: 
+    browser = await p.firefox.launch(
+      headless=False,
+    )
+    page = await browser.new_page()
+    await page.goto('https://finance.yahoo.com')
+    await page.wait_for_timeout(5000)
 
-loader = PlaywrightURLLoader(urls=["https://finance.yahoo.com/","https://www.businessinsider.com/","https://www.marketwatch.com/",])
-docs = loader.load()
+    article_links = await page.query_selector_all(
+      'a.subtle-link'
+    )
+    
+    urls = set()
+    for link in article_links:
+      href = await link.get_attribute("href")
+      if href and href.startswith("https://finance.yahoo.com/news"):
+        urls.add(href)
+    print(f"found {len(urls)} articles")
+
+    for url in urls:
+      await page.goto(url)
+      print(f"\n {url}")
+      content = ""
+      paragraphs = await page.query_selector_all("article p")
+      if not paragraphs:
+        paragraphs = await page.query_selector_all("div[class*='caas-body'] p")
+      for p in paragraphs:
+        content += await p.inner_text() + "\n"
+      
+      docs.append(Document(page_content=content, metadata={"source": url}))
+
+    await browser.close()
 
 print("here you go", type(docs))
 print("testing", docs)
@@ -84,3 +118,6 @@ def generate_answer(question):
   response = llm.invoke(prompt)
   print(response)
   return(response)
+
+if __name__ == "__main__":
+    asyncio.run(main())
