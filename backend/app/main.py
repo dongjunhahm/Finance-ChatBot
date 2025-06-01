@@ -7,8 +7,7 @@ if sys.platform == "win32":
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from backend.app.rag import generate_answer
-from backend.app import rag
+from app import rag
 from contextlib import asynccontextmanager
 
 
@@ -38,7 +37,7 @@ app.add_middleware(
 async def ask_question(request: Request):
   data = await request.json()
   question = data["question"]
-  answer = generate_answer(question, retriever)
+  answer = rag.generate_answer(question, retriever)
   return {"answer": answer}
 
 
