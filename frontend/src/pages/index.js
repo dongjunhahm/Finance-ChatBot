@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import showdown from "showdown";
 import MarketChart from "../components/marketChart";
 
 const Home = () => {
@@ -17,6 +18,13 @@ const Home = () => {
       el.scrollTop = el.scrollHeight;
     }
   }, [messages]);
+
+  function normalizeMarkdown(md) {
+    return md
+      .replace(/(\* .+)/g, "\n$1") // ensure bullet points are separated
+      .replace(/(#+ .+)/g, "\n\n$1\n\n") // ensure headings are separated
+      .replace(/\n{2,}/g, "\n\n"); // normalize multiple newlines
+  }
 
   const ask = async () => {
     if (!inputValue.trim()) return;
@@ -42,6 +50,20 @@ const Home = () => {
         { sender: "bot", text: "Something went wrong. Please try again." },
       ]);
     }
+  };
+
+  const convertToMarkdown = (str) => {
+    const converter = new showdown.Converter({
+      ghCompatibleHeaderId: true,
+      headerLevelStart: 1,
+      simplifiedAutoLink: true,
+      strikethrough: true,
+      tables: true,
+      tasklists: true,
+    });
+    const text = normalizeMarkdown(str);
+    const html = converter.makeHtml(text);
+    return html; //just in order to make sure that no malicious scripts are present
   };
 
   const handleKeyPress = (e) => {
@@ -72,11 +94,12 @@ const Home = () => {
               style={{ textAlign: msg.sender === "user" ? "right" : "left" }}
               className="pt-3"
             >
-              <span className="prose inline-block bg-gray-100 text-sm p-2 rounded-lg max-w-full break-words">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {msg.text}
-                </ReactMarkdown>
-              </span>
+              <div
+                className="prose prose-base inline-block bg-gray-100 text-sm p-2 rounded-lg max-w-full"
+                dangerouslySetInnerHTML={{
+                  __html: convertToMarkdown(msg.text),
+                }}
+              />
             </div>
           ))}
         </div>
