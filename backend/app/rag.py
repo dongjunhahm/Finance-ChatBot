@@ -1,5 +1,4 @@
 import os
-import asyncio
 from typing import List
 from playwright.async_api import async_playwright
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -10,7 +9,7 @@ from langchain_core.documents import Document
 
 os.environ['USER_AGENT'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
 
-async def main() -> List[Document]:  # Renamed to main
+async def main() -> List[Document]:  
     docs = []
 
     async with async_playwright() as p:
@@ -46,7 +45,7 @@ def initialize_retriever(docs: List[Document]):
     local_embeddings = OllamaEmbeddings(model="all-minilm")
 
     vectorstore = Chroma.from_documents(documents=all_splits, embedding=local_embeddings)
-    return vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 3})  # ✅ return retriever
+    return vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 3})  
 
 def generate_answer(question: str, retriever) -> str:
     if retriever is None:
@@ -58,7 +57,22 @@ def generate_answer(question: str, retriever) -> str:
     llm = OllamaLLM(model="llama3.2:1b")
     prompt = f"""
     ------ Instructions ------
-    [Your full instruction prompt here...]
+     Follow these instructions sequentially. 
+
+    - Given the question regarding finance, 
+    - Check if the question asks about a specific stock or sector
+    - Check if the question asks a general question about the market state or things to look out for
+    - Check if the question asks about a specific event that has occured.
+    - If a specific stock/sector is mentioned, based on the latest financial reports and market news from multiple sources, summarize how today's events are likely to affect the stock mentioned.
+    - Focus on earnings, regulartory events, analyst forecasts, and market sentiment. 
+    - If a specific stock/sector is mentioned but the context does not discuss the stock/sector, respond with "No significant impact on [stock/sector]" or similar phrasing. 
+    - If a specific event is mentioned, focus on how the provided context describes the event, and mention any possible impacts from that event in financial sectors.
+    - If a general and open ended question about the market is asked, instead give a summary about the most important or key events. 
+    - If a general financial question is asked that would not require the context, instead reply to the best of your ability, acting as a financial analyst expert.
+    - Format your response in a markdown friendly format.
+    - Create spaces via newlines in between each section of text you create.
+
+    - You are to provide a direct answer ONLY to the question. 
     ----- QUESTION ------
     {question}
     ----- CONTEXT -------
