@@ -23,7 +23,9 @@ async def main() -> List[Document]:  # Renamed to main
         urls = set()
         for link in article_links:
             href = await link.get_attribute("href")
-            if href and href.startswith("https://finance.yahoo.com/news/"):
+            if href == "https://finance.yahoo.com/news/":
+                continue
+            elif href and href.startswith("https://finance.yahoo.com/news/"):
                 urls.add(href)
         print(f"found {len(urls)} articles")
 
