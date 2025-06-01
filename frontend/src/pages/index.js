@@ -3,7 +3,6 @@ import axios from "axios";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import MarketChart from "../components/marketChart";
-import Chatbox from "../components/chatbox";
 
 const Home = () => {
   const [inputValue, setInputValue] = useState("");
