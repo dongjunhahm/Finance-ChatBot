@@ -7,8 +7,8 @@ if sys.platform == "win32":
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from app.temprag import generate_answer
-from app import temprag
+from backend.app.rag import generate_answer
+from backend.app import rag
 from contextlib import asynccontextmanager
 
 
@@ -19,8 +19,8 @@ docs = []
 async def lifespan(app: FastAPI):
   global retriever, docs
 
-  docs = await temprag.main()
-  retriever = temprag.initialize_retriever(docs)
+  docs = await rag.main()
+  retriever = rag.initialize_retriever(docs)
 
   yield
 
