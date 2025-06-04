@@ -10,7 +10,28 @@ const Home = () => {
   const [messages, setMessages] = useState([
     { sender: "bot", text: "Ask a financial question to get started!" },
   ]);
+  const [isLoading, setIsLoading] = useState(false);
   const chatContainerRef = useRef(null);
+  const loadingSteps = [
+    ["⢿", "⣻", "⣽"],
+    ["⣾", "⣷", "⣯"],
+    ["⣟", "⡿", "⣿"],
+  ];
+  const [loadingIndex, setLoadingIndex] = useState(0);
+
+  const intervalRef = useRef(null);
+
+  useEffect(() => {
+    if (isLoading) {
+      intervalRef.current = setInterval(() => {
+        setLoadingIndex((prevIndex) => (prevIndex + 1) % loadingSteps.length);
+      }, 100); //time between each iteration, in milliseconds
+    }
+    return () => {
+      clearInterval(intervalRef.current);
+      setLoadingIndex(0);
+    };
+  }, [isLoading]);
 
   useEffect(() => {
     const el = chatContainerRef.current;
@@ -32,6 +53,7 @@ const Home = () => {
     setMessages((prev) => [...prev, { sender: "user", text: inputValue }]);
     const userInput = inputValue;
     setInputValue("");
+    setIsLoading(true);
 
     try {
       const response = await axios.post(
@@ -43,12 +65,14 @@ const Home = () => {
         ...prev,
         { sender: "bot", text: response.data.answer },
       ]);
+      setIsLoading(false);
     } catch (error) {
       console.error("API error:", error);
       setMessages((prev) => [
         ...prev,
         { sender: "bot", text: "Something went wrong. Please try again." },
       ]);
+      setIsLoading(false);
     }
   };
 
@@ -102,6 +126,12 @@ const Home = () => {
               />
             </div>
           ))}
+
+          {isLoading && (
+            <div style={{ textAlign: "left" }} className="pt-3">
+              {loadingSteps[loadingIndex]}
+            </div>
+          )}
         </div>
 
         {/* Market Chart on the right */}
