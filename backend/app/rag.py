@@ -74,6 +74,7 @@ def generate_answer(question: str, retriever) -> str:
     - If a specific event is mentioned, focus on how the provided context describes the event, and mention any possible impacts from that event in financial sectors.
     - If a general and open ended question about the market is asked, instead give a summary about the most important or key events. 
     - If a general financial question is asked that would not require the context, instead reply to the best of your ability, acting as a financial analyst expert.
+    - If the question is along the lines of "What stock should I invest in", give your best reccomendation assuming you are a financial analyst. Stray away from recent events, and instead give general advice. 
     - Format your response in a markdown friendly format.
     - Create spaces via newlines in between each section of text you create.
 
