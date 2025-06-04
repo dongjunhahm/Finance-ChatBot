@@ -29,12 +29,17 @@ async def main() -> List[Document]:
         print(f"found {len(urls)} articles")
 
         for url in urls:
-            await page.goto(url)
-            print(f"\n {url}")
-            await page.wait_for_selector("div.atoms-wrapper", timeout=10000)
-            paragraphs = await page.query_selector_all("div.atoms-wrapper > p")
-            content = "\n".join([await p.inner_text() for p in paragraphs])
-            docs.append(Document(page_content=content, metadata={"source": url}))
+            try:
+                await page.goto(url)
+                print(f"\n {url}")
+                await page.wait_for_selector("div.atoms-wrapper", timeout=10000)
+                paragraphs = await page.query_selector_all("div.atoms-wrapper > p")
+                content = "\n".join([await p.inner_text() for p in paragraphs])
+                docs.append(Document(page_content=content, metadata={"source": url}))
+            except Exception as e:
+                print(f"failed to read page {url} : {e} \n Likely a premium article.. ")
+                continue
+            
 
         await browser.close()
     return docs
