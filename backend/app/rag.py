@@ -42,6 +42,7 @@ async def main() -> List[Document]:
             
 
         await browser.close()
+    print(docs)
     return docs
 
 def initialize_retriever(docs: List[Document]):
