@@ -10,7 +10,7 @@ from langchain_core.documents.base import Document
 from tavily import TavilyClient
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(dotenv_path="C:/Users/dongj/MarketBuddy/.env.local")
 
 os.environ['USER_AGENT'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
 

@@ -10,11 +10,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from app import rag
 from contextlib import asynccontextmanager
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_ollama import OllamaEmbeddings
-from langchain_chroma import Chroma
-from langchain_ollama.llms import OllamaLLM
-from langchain_core.documents.base import Document
+
 
 
 vectorstore = None
