@@ -1,6 +1,7 @@
 import os
 import requests 
 from typing import List
+import anthropic
 from playwright.async_api import async_playwright
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_ollama import OllamaEmbeddings
@@ -40,7 +41,7 @@ async def main() -> List[Document]:
                 await page.wait_for_selector("div.atoms-wrapper", timeout=10000)
                 paragraphs = await page.query_selector_all("div.atoms-wrapper > p")
                 content = "\n".join([await p.inner_text() for p in paragraphs])
-                docs.append(Document(page_content=content, metadata={"source": url}))
+                docs.append(Document(page_content=content, metadata={"source": "Playwright", "url": url}))
             except Exception as e:
                 print(f"failed to read page {url} : {e} \n Likely a premium article.. ")
                 continue
@@ -103,7 +104,7 @@ def fit_to_document (search_results):
                     metadata={
                         'url': url,
                         'title': title,
-                        'source': 'tavily_search',
+                        'source': 'Tavily',
                         'score': result.get('score', 0)
                     }
                 )
@@ -170,12 +171,23 @@ def generate_answer(question: str, retriever) -> str:
         raise RuntimeError("Retriever not initialized yet")
 
     retrieved_docs = retriever.invoke(question)
+    source_counts = {"Playwright": 0, "Tavily": 0}
+
+    for doc in retrieved_docs:
+        source = doc.metadata.get("source")
+        source_counts[source] += 1
+
     context = ' '.join([doc.page_content for doc in retrieved_docs])
+
+    
 
     llm = OllamaLLM(model="llama3.2:1b")
     prompt = f"""
     ------ Instructions ------
      Follow these instructions sequentially. 
+    
+     You are a helpful seasoned financial analyst at a Fortune 500 company.
+     Prioritize recent information, with the current year in mind.
 
     - Given the question regarding finance, 
     - Check if the question asks about a specific stock or sector
@@ -192,11 +204,40 @@ def generate_answer(question: str, retriever) -> str:
     - Create spaces via newlines in between each section of text you create.
 
     - You are to provide a direct answer ONLY to the question. 
-    ----- QUESTION ------
-    {question}
-    ----- CONTEXT -------
-    {context}
+
     """
-    response = llm.invoke(prompt)
-    print(response)
-    return response
+
+    client = anthropic.Anthropic()
+
+    response = client.messages.create(
+        model="claude-3-5-sonnet-latest",
+        max_tokens = 1000,
+        temperature = 1,
+        system = f"{prompt}",
+        messages=[
+        {
+            "role": "user", 
+            "content": f"""
+            The user has asked you a financial question. Answer the question to the best of your ability using the context given. Give your professional opinion.
+            
+            <question>
+            {question}
+            </question>
+
+            <context>
+            {context}
+            </context>
+            """
+        }
+        ]
+    )
+
+    response_text = "failed to generate output."
+
+    if response.content[0].type == "text":
+        response_text = response.content[0].text
+    print(response_text)
+    print(f"TESTING PURPOSES : Playwright - {source_counts['Playwright']}, Tavily - {source_counts['Tavily']}")
+    return response_text
+
+    
