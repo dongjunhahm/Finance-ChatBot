@@ -1,11 +1,16 @@
 import os
+import requests 
 from typing import List
 from playwright.async_api import async_playwright
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_ollama import OllamaEmbeddings
 from langchain_chroma import Chroma
 from langchain_ollama.llms import OllamaLLM
-from langchain_core.documents import Document
+from langchain_core.documents.base import Document
+from tavily import TavilyClient
+from dotenv import load_dotenv
+
+load_dotenv()
 
 os.environ['USER_AGENT'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
 
@@ -42,16 +47,37 @@ async def main() -> List[Document]:
             
 
         await browser.close()
-    print(docs)
     return docs
 
-def initialize_retriever(docs: List[Document]):
+def initialize_vectorstore(docs: List[Document]):
     text_splitter = RecursiveCharacterTextSplitter(chunk_size=1200, chunk_overlap=100, add_start_index=True)
     all_splits = text_splitter.split_documents(docs)
     local_embeddings = OllamaEmbeddings(model="all-minilm")
 
     vectorstore = Chroma.from_documents(documents=all_splits, embedding=local_embeddings)
-    return vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 3})  
+    return vectorstore
+
+class ParsedDocument:
+    def __init__(self, page_content: str, url: str):
+        self.page_content = page_content
+        self.url = url
+
+async def search_web(query : str) -> List[Document]:
+    tavily_client = TavilyClient(api_key=(os.getenv("TAVILY_API_KEY")))
+    response = tavily_client.search(query)
+    parsed_responses = fit_to_document(response)
+    print(parsed_responses)
+
+    return parsed_responses
+
+def fit_to_document (search_results):
+    parsed_documents = []
+    for result in search_results:
+        parsed_document = ParsedDocument(page_content=result['content'], url=result['url'])
+        document = Document(page_content = parsed_document.page_content, metadata={'url': parsed_document.url})
+        parsed_documents.append(document)
+
+    return parsed_documents 
 
 def generate_answer(question: str, retriever) -> str:
     if retriever is None:
