@@ -43,7 +43,7 @@ async def main() -> List[Document]:
                 content = "\n".join([await p.inner_text() for p in paragraphs])
                 docs.append(Document(page_content=content, metadata={"source": "Playwright", "url": url}))
             except Exception as e:
-                print(f"failed to read page {url} : {e} \n Likely a premium article.. ")
+                print(f"failed to read page {url} : {e} \n Likely a premium article.. ")    
                 continue
             
 
@@ -207,7 +207,7 @@ def generate_answer(question: str, retriever) -> str:
 
     """
 
-    client = anthropic.Anthropic()
+    client = anthropic.Anthropic(api_key=(os.getenv("ANTHROPIC_API_KEY")))
 
     response = client.messages.create(
         model="claude-3-5-sonnet-latest",
